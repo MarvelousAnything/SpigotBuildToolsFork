@@ -97,6 +97,8 @@ public class Builder
     private static File msysDir;
     private static File maven;
 
+    private static int timeout;
+
     public static void main(String[] args) throws Exception
     {
         logOutput();
@@ -163,6 +165,7 @@ public class Builder
         {
         } ).withValuesSeparatedBy( ',' );
         OptionSpec<Void> compileIfChanged = parser.accepts( "compile-if-changed", "Run BuildTools only when changes are detected in the repository" );
+        OptionSpec<Integer> timeoutFlag = parser.accepts( "timeout", "Timeout in milliseconds" ).withRequiredArg().ofType( Integer.class ).defaultsTo( 5000 );
 
         OptionSet options = parser.parse( args );
 
@@ -181,6 +184,7 @@ public class Builder
         dev = options.has( devFlag );
         remapped = options.has( remappedFlag );
         compile = options.valuesOf( toCompile );
+        timeout = options.valueOf( timeoutFlag );
         if ( options.has( skipCompileFlag ) )
         {
             compile = Collections.singletonList( Compile.NONE );
@@ -792,8 +796,8 @@ public class Builder
     public static final String get(String url) throws IOException
     {
         URLConnection con = new URL( url ).openConnection();
-        con.setConnectTimeout( 5000 );
-        con.setReadTimeout( 5000 );
+        con.setConnectTimeout( timeout );
+        con.setReadTimeout( timeout );
 
         try ( InputStreamReader r = new InputStreamReader( con.getInputStream() ) )
         {
